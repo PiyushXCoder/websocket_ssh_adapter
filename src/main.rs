@@ -1,4 +1,4 @@
-use std::{io::Write, sync::Arc};
+use std::sync::Arc;
 
 use rocket::{
     futures::{SinkExt, StreamExt},
@@ -55,15 +55,23 @@ async fn connect_ssh(
 
             loop {
                 tokio::select! {
-                    Ok(_) = ssh_stream.read_buf(&mut buf) => {
-                        stream.send(Message::Binary(buf.clone())).await.unwrap();
-                print!("{}", String::from_utf8_lossy(&buf));
-                std::io::stdout().flush().unwrap();
+                    res = ssh_stream.read_buf(&mut buf) => {
+                        match res {
+                            Ok(_) => {
+                                stream.send(Message::Binary(buf.clone())).await.unwrap();
+                                // print!("{}", String::from_utf8_lossy(&buf));
+                                // std::io::stdout().flush().unwrap();
+                                buf = Vec::new();
+                            }, Err(_) => {
+                                return Ok(());
+                            }
+                        }
                     },
                     Some(Ok(message)) = stream.next() => {
                         if message.is_close() {
                             break;
                         }
+
                         ssh_stream.write(message.to_text().unwrap().as_bytes()).await.unwrap();
                     }
                 }
