@@ -13,7 +13,7 @@ def on_error(ws, error):
     pass
 
 def on_close(ws, close_status_code, close_msg):
-    closing = True
+    print("Closing!")
     pass
 
 def on_open(ws):
@@ -22,8 +22,10 @@ def on_open(ws):
 def send_key(ws):
     while True:
         c = readchar.readchar()
+        if c == "":
+            ws.close()
+            return;
         ws.send(c)
-        
         
 
 if __name__ == "__main__":
@@ -39,6 +41,7 @@ if __name__ == "__main__":
     ws.run_forever(dispatcher=rel, reconnect=5)  # Set dispatcher to automatic reconnection, 5 second reconnect delay if connection closed unexpectedly
     rel.signal(2, rel.abort)  # Keyboard Interrupt
     rel.dispatch()
+
 
 
 
