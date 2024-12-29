@@ -4,7 +4,7 @@ from rel.rel import threading
 import websocket
 import rel
 import readchar
-
+import os
 
 def on_message(ws, message):
     print(message.decode("utf-8"), end="", flush=True)
@@ -26,7 +26,8 @@ def send_key(ws):
         
 
 if __name__ == "__main__":
-    ws = websocket.WebSocketApp("ws://localhost:8000/ssh/127.0.0.1:22?user=bilbo&password=insecure_password",
+    rows, columns = os.popen('stty size', 'r').read().split()
+    ws = websocket.WebSocketApp(f"ws://localhost:8000/ssh/127.0.0.1:22?user=bilbo&password=insecure_password&dimension.0={columns}&dimension.1={rows}",
                         on_open=on_open,
                         on_message=on_message,
                         on_error=on_error,

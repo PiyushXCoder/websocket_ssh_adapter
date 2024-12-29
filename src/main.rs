@@ -27,11 +27,12 @@ impl client::Handler for Client {
     }
 }
 
-#[get("/ssh/<host>?<user>&<password>")]
+#[get("/ssh/<host>?<user>&<password>&<dimension>")]
 async fn connect_ssh(
     host: &str,
     user: &str,
     password: &str,
+    dimension: Option<(u32, u32)>,
     ws: rocket_ws::WebSocket,
 ) -> rocket_ws::Channel<'static> {
     let mut session = russh::client::connect(Arc::new(client::Config::default()), host, Client {})
@@ -42,8 +43,9 @@ async fn connect_ssh(
 
     let channel = session.channel_open_session().await.unwrap();
 
+    let (columns, rows) = dimension.unwrap_or((80, 20));
     channel
-        .request_pty(true, "xterm", 80, 20, 800, 200, &[])
+        .request_pty(true, "xterm", columns, rows, 0, 0, &[])
         .await
         .unwrap();
     channel.request_shell(true).await.unwrap();
