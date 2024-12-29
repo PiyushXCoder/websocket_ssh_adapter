@@ -22,9 +22,6 @@ def on_open(ws):
 def send_key(ws):
     while True:
         c = readchar.readchar()
-        if c == "":
-            ws.close()
-            return;
         ws.send(c)
         
 
